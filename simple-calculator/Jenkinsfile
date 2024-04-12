@@ -1,25 +1,36 @@
 pipeline {
-agent { node { label 'maven' } }
-void sendNotification(String action, String email) {
-mail to: "${email}",
-subject: "Pipeline ${action}: ${currentBuild.fullDisplayName}",
-body: "The following pipeline ${action}: ${env.BUILD_URL}"
-}
-options { skipDefaultCheckout true }
-stages {
-stage('Checkout') {
-steps {
-sendNotification('started', 'team@example.com')
-git branch: 'notifications',
-url: 'https://github.com/idamato/DO400-apps'
-}
-}
-stage('Test') {
-steps {
-dir('simple-calculator') {
-sh './mvnw clean test'
-}
-}
-}
-}
+  agent { 
+    node { 
+      label 'maven' 
+    }
+  }
+  void sendNotification(String action, String email) {
+    mail to: "${email}",
+    subject: "Pipeline ${action}: ${currentBuild.fullDisplayName}",
+    body: "The following pipeline ${action}: ${env.BUILD_URL}"
+  }
+  options { 
+    skipDefaultCheckout true 
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        sendNotification('started', 'team@example.com')
+        git branch: 'notifications',
+          url: 'https://github.com/idamato/DO400-apps'
+      }
+    }
+    stage('Test') {
+      steps {
+        dir('simple-calculator') {
+          sh './mvnw clean test'
+        }
+      }
+    }
+  }
+  post {
+    always {
+      sendNotification('finished', 'team@example.com')
+    }
+  }
 }
